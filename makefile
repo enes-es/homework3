@@ -34,6 +34,7 @@ clean:
 	$(RM) *.class 
 
 cleanreport:
-	$(RM) report(?:\(\d+\))?\.txt
+	rm report.txt
+	find . -type f -regex '.*report(\([1-9][0-9]*\))?\.txt' -exec rm {} +
 cleandoc:
 	$(RM) -r ./javadoc

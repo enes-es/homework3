@@ -3,8 +3,17 @@ import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.time.LocalDate;
+
+//TODO: find functions and variables to add final identifier.
 
 public class Inventory {
+    private LinkedList<ArrayList<DeviceObj>> categoriesLinkedList;
 
     // DISCUSS: should it throw if newDevice category invalid?
     // DISCUSS: what about other invalid datas?
@@ -18,15 +27,31 @@ public class Inventory {
     }
 
     private Integer getCategoryIdx(String category_str) {
-        return null;
+        switch (category_str.toLowerCase()) {
+            case "smartphone":
+                return SMARTPHONE;
+
+            case "laptop":
+                return LAPTOP;
+
+            case "tv":
+                return TV;
+            case "headphones":
+                return HEADPHONES;
+
+            case "smartwatch":
+                return SMARTWATCH;
+
+            default:
+                return null;
+        }
+
     }
 
-    private boolean isCategory(ArrayList<DeviceObj> category, String categoryName) {
-        return true;
-    }
+
 
     // DISCUSS: shouldn't this be a method of DeviceObj?
-    private DeviceObj addDeviceFromUser() {
+    private DeviceObj addDevice() {
         Scanner input = new Scanner(System.in);
 
         System.out.print("Enter category name: ");
@@ -41,20 +66,52 @@ public class Inventory {
         System.out.print("Enter quantity: ");
         Integer quantity = processQuantity(input.nextLine());
 
-        // check if entered data is correct
+        // check if entered data is correct ?
 
         // creat the appropriate device and return
 
-        return null;
+        DeviceObj newDevice = new DeviceObj(category, name, price, quantity);
+
+        input.close();
+
+        return newDevice;
 
     }
 
-    public DeviceObj removeDevice(String name) {
+    public DeviceObj removeDevice(String name) throws NoSuchElementException {
         // find device
         // if exists remove and return it
         // if doesn't exist throw //CHECK: is throwing ok? //DISCUSS: what to throw?
-        return null;
+
+        for (ArrayList<DeviceObj> category : categoriesLinkedList)
+            for (DeviceObj device : category) {
+                if (device.getName().equals(name)) {
+                    category.remove(device);
+                    return device;
+                }
+            }
+
+        throw new NoSuchElementException("Can't find the device");
     }
+
+    private DeviceObj removeDevice() throws NoSuchElementException {
+        // ask for name
+        // call removeDevice(name)
+        // return removed device
+
+        Scanner scan = new Scanner(System.in);
+        String name;
+        DeviceObj removedDevice = null;
+
+        System.out.print("Enter the name of the device to remove: ");
+        name = scan.nextLine();
+
+        removedDevice = removeDevice(name);
+
+        scan.close();
+        return removedDevice;
+    }
+    
 
     public DeviceObj updateDevice() {
         // ask new data
@@ -85,17 +142,17 @@ public class Inventory {
             // if it doesn't exist (handeld by catch statement)
             // notify user and don't update any device
 
-            //might throw NoSuchElementException, handled within catch
-            deviceToUpdate = findDevice(name); 
+            // might throw NoSuchElementException, handled within catch
+            deviceToUpdate = findDevice(name);
 
             price_double = processPrice(price_str);
             if (price_double == null)
-                price_double deviceToUpdate.getPrice();
+                price_double = deviceToUpdate.getPrice();
 
-            deviceToUpdate.setPrice(price);
+            deviceToUpdate.setPrice(price_double);
             deviceToUpdate.setQuantity(quantity);
 
-            System.out.printf("%s details updated: Price - %.2f$, Quantity - %d", name, price, quantity);
+            System.out.printf("%s details updated: Price - %.2f$, Quantity - %d", name, price_double, quantity);
 
         }
 
@@ -111,7 +168,31 @@ public class Inventory {
 
         }
 
+        finally {
+            scan.close();
+        }
         return null;
+    }
+
+
+
+
+
+
+
+
+    public DeviceObj findDevice(String name) {
+        DeviceObj targetDevice = null;
+
+        for (ArrayList<DeviceObj> category : categoriesLinkedList)
+            for (DeviceObj device : category) {
+                if (device.getName().equals(name)) {
+                    targetDevice = device;
+                    break;
+                }
+            }
+
+        return targetDevice;
     }
 
     public void displayAllDevices() {
@@ -128,26 +209,54 @@ public class Inventory {
             categoryToPrint = categoriesLinkedList.get(i);
 
             for (int j = 0, array_length = categoryToPrint.size(); j < array_length; ++j) {
-                System.out.printf("%d. ", objectCount)
+                System.out.printf("%d. ", objectCount);
                 categoryToPrint.get(j).print(); // DISCUSS: change method name from print?
-                
+
             }
 
         }
     }
 
-    public DeviceObj findCheapest() {
-        Integer objectCount = 0;
-        for (int i = 0, length = categoriesLinkedList.size(); i < length; ++i) {
-            ArrayList<DeviceObj> categoryToPrint = categoriesLinkedList.get(i);
-
-            for (int j = 0, array_length = categoryToPrint.size(); j < array_length; ++j) {
-                
-            }
-        return null;
+    private void printObjectList(ArrayList<DeviceObj> objectList) {
+        for (int count = 0; count < objectList.size(); ++count) {
+            System.out.printf("%d. ", count);
+            objectList.get(count).print();
+        }
     }
 
-    private LinkedList<ArrayList<DeviceObj>> categoriesLinkedList;
+    public DeviceObj findCheapest() {
+        DeviceObj currentCheapest = null;
+        DeviceObj currentObject = null;
+        ArrayList<DeviceObj> currentCategory = null;
+        Integer objectCount = 0;
+
+        for (int i = 0, length = categoriesLinkedList.size(); i < length; ++i) {
+            currentCategory = categoriesLinkedList.get(i);
+
+            for (int j = 0, array_length = currentCategory.size(); j < array_length; ++j) {
+                currentObject = currentCategory.get(j);
+                if (currentObject.getPrice() < currentCheapest.getPrice())
+                    currentCheapest = currentObject;
+            }
+        }
+        return currentCheapest;
+    }
+
+    public void printSortedByPrice() {
+        ArrayList<DeviceObj> objectList = new ArrayList<>();
+        for (ArrayList<DeviceObj> currentCategory : categoriesLinkedList) {
+            // CHECK: does this work
+            // DISCUSS: should we use a different approach/method ?
+            objectList.addAll(currentCategory);
+        }
+
+        // TODO: implement comparator, or provide custom one here.
+
+        // Collections.sort(objectList);
+
+        printObjectList(objectList);
+
+    }
 
     private void printMainMenu() {
         System.out.println("This is the main menu.");
@@ -167,31 +276,39 @@ public class Inventory {
 
                 switch (selection) {
                     case 1:
-                        // Add device
+                        addDevice();
                         break;
                     case 2:
-                        // Remove device
-                        break;
+                        removeDevice();
+                    break;
                     case 3:
-                        // Update device
+                        updateDevice();
                         break;
                     case 4:
-                        // List devices
+                        displayAllDevices();
                         break;
                     case 5:
-                        // Find cheapest device
+                        DeviceObj cheapestDevice = findCheapest();
+                        System.out.println("Cheapest device: ");
+                        System.out.printf("Category: %s, Name: %s, Price: %.2f$, Quantity: %d\n",
+                                cheapestDevice.getCategory(), cheapestDevice.getName(), cheapestDevice.getPrice(),
+                                cheapestDevice.getQuantity());
                         break;
                     case 6:
-                        // Find most expensive device
+                        // Sort by price
+                        printSortedByPrice();  
                         break;
                     case 7:
-                        // Find device by name
+                        // Total inventory value
+                        printTotalValue();
                         break;
                     case 8:
-                        // Find device by category
+                        // Restocking a device
+                        restockDevice();
                         break;
                     case 9:
-                        // Find device by price
+                        // Export inventory report
+                        exportInventoryReport();
                         break;
                     case 0:
                         // Exit
@@ -209,6 +326,147 @@ public class Inventory {
             }
         } while (selection != 0);
 
+        input.close();
+    }
+
+    // DISCUSS: should I catch InputMismatchException from the scanner?
+    private DeviceObj restockDevice() {
+        String name;
+        Integer quantityChange;
+        DeviceObj device;
+
+        Scanner scan = new Scanner(System.in);
+
+        System.out.print("Enter the name of the device to restock: ");
+        name = scan.nextLine();
+        device = findDevice(name);
+
+        System.out.print("Do you want to add or remove stock? (Add/Remove): ");
+        if (scan.nextLine().equals("Add")) {
+            System.out.print("Enter the quantity to add: ");
+            quantityChange = scan.nextInt();
+            device.addQuantity(quantityChange);
+
+        } else if (scan.nextLine().equals("Remove")) {
+            System.out.print("Enter the wuantity to remove: ");
+            quantityChange = scan.nextInt();
+            device.removeQuantity(quantityChange);
+        }
+
+        scan.close();
+        return device;
+    }
+
+    public void exportInventoryReport() {
+        // CHECK: filename compatible with assignment
+        // CHECK: this overwrites the file with same name, if it exists. this ok?
+        // DISCUSS: is this +1 to filename approach appropriate?
+        String fileName = "report";
+        String filePath = fileName + "txt";
+        Integer index = 1;
+        File baseFile = new File(filePath);
+        try {
+            while (baseFile.exists()) {
+                filePath = fileName + index + ".txt";
+                baseFile = new File(filePath);
+                ++index;
+            }
+
+            File file = new File(filePath);
+            file.createNewFile();
+
+            PrintWriter writer = new PrintWriter(new FileWriter(filePath));
+            Integer count = Integer.valueOf(0);
+            Double value = Double.valueOf(0);
+
+            writer.println("Electronics Shop Inventroy Report");
+            // TODO: println "Generated on: `date`"
+            LocalDate date = LocalDate.now();
+            writer.printf("Generated on: %s\n", reportDateFormat(date));
+            writer.println("---------------------------------------");
+            writer.printf("| %s  | %s\t| %s\t\t| %s\t| %s |\n", "No.", "Category", "Name", "Price", "Quantity");
+            writer.println("---------------------------------------");
+
+            for (ArrayList<DeviceObj> category : categoriesLinkedList)
+                for (DeviceObj device : category) {
+                    writer.println(formattedExportLine(device, count));
+                    ++count;
+                    value += device.getPrice() * device.getQuantity();
+                }
+
+            writer.println("---------------------------------------");
+            writer.print("\n\n");
+
+            writer.println("Summary: ");
+            writer.printf("- Total Number of Devices: %d\n", count);
+            writer.printf("- Total Inventory Value: %.2f\n\n", value);
+
+            writer.print("End of Report");
+
+        }
+
+        // TODO: caught exception type.
+        catch (Exception e) {
+
+        }
+    }
+
+    private String reportDateFormat(LocalDate date) {
+        String formattedDate = new String();
+        // example format: 26th March 2024
+        formattedDate = String.format("%d%s %s %d", date.getDayOfMonth(), getDaySuffix(date.getDayOfMonth()),
+                date.getMonth(), date.getYear());
+
+        return formattedDate;
+    }
+
+    private String getDaySuffix(Integer dayOfMonth) {
+        String suffix;
+        if (dayOfMonth >= 11 && dayOfMonth <= 13)
+            suffix = "th";
+
+        else {
+            switch (dayOfMonth % 10) {
+                case 1:
+                    suffix = "st";
+                    break;
+                case 2:
+                    suffix = "nd";
+                    break;
+                case 3:
+                    suffix = "rd";
+                    break;
+                default:
+                    suffix = "th";
+                    break;
+            }
+        }
+
+        return suffix;
+    }
+
+    private String formattedExportLine(DeviceObj device, int no) {
+        String line = new String();
+        // CHECK: is this format ok ?
+        String.format("| %d  | %s | %s | %.2f | %d |", no, device.getCategory(), device.getName(), device.getPrice(),
+                device.getQuantity());
+
+        return line;
+    }
+
+    public Double totalValue() {
+        Double value = Double.valueOf(0);
+
+        for (ArrayList<DeviceObj> category : categoriesLinkedList)
+            for (DeviceObj device : category) {
+                value += device.getPrice();
+            }
+
+        return value;
+    }
+
+    public void printTotalValue() {
+        System.out.printf("Total inventory value: $%.2f", totalValue());
     }
 
     private static Double processPrice(String price) {

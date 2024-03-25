@@ -3,7 +3,6 @@ import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -14,6 +13,13 @@ import java.time.LocalDate;
 
 public class Inventory {
     private LinkedList<ArrayList<DeviceObj>> categoriesLinkedList;
+
+    public Inventory() {
+        categoriesLinkedList = new LinkedList<ArrayList<DeviceObj>>();
+        for (int i = 0; i < 5; ++i) {
+            categoriesLinkedList.add(new ArrayList<DeviceObj>());
+        }
+    }
 
     // DISCUSS: should it throw if newDevice category invalid?
     // DISCUSS: what about other invalid datas?
@@ -48,34 +54,82 @@ public class Inventory {
 
     }
 
-
-
     // DISCUSS: shouldn't this be a method of DeviceObj?
     private DeviceObj addDevice() {
-        Scanner input = new Scanner(System.in);
+        Scanner in = new Scanner(System.in);
+        DeviceObj newDevice = null;
 
         System.out.print("Enter category name: ");
-        String category = input.nextLine();
+        String category = in.nextLine();
 
         System.out.print("Enter device name: ");
-        String name = input.nextLine();
+        String name = in.nextLine();
 
         System.out.print("Enter price: ");
-        Double price = processPrice(input.nextLine());
+        Double price = processPrice(in.nextLine());
 
         System.out.print("Enter quantity: ");
-        Integer quantity = processQuantity(input.nextLine());
+        Integer quantity = processQuantity(in.nextLine());
 
-        // check if entered data is correct ?
+        // in.close(); //causes steram closed for System.in, in the Main.java
 
-        // creat the appropriate device and return
+        try {
+            newDevice = deviceObjCreator(category, name, price, quantity);
 
-        DeviceObj newDevice = new DeviceObj(category, name, price, quantity);
+            // add new device to the corresponding category.
+            categoriesLinkedList.get(getCategoryIdx(category)).add(newDevice);
+            return newDevice;
 
-        input.close();
+        } catch (NullPointerException e) {
+            System.err.println("There's ben an issue please try again.");
+            return null;
+        }
+
+    }
+
+    // TODO: change visibility to private
+    public DeviceObj deviceObjCreator(String category, String name, Double price, Integer quantity) {
+        // DISCUSS: should we throw if category is invalid?
+        // DISCUSS: should we throw if price or quantity is invalid?
+        // DISCUSS: should we throw if name is invalid?
+
+        // create the appropriate device and return
+
+        DeviceObj newDevice = null;
+
+        switch (category.toLowerCase()) {
+            case "smartphone":
+                newDevice = new Smartphone(name, price, quantity);
+                break;
+
+            case "smart phone":
+                newDevice = new Smartphone(name, price, quantity);
+                break;
+
+            case "laptop":
+                newDevice = new Laptop(name, price, quantity);
+                break;
+
+            case "tv":
+                newDevice = new TV(name, price, quantity);
+                break;
+
+            case "headphones":
+                newDevice = new Headphones(name, price, quantity);
+                break;
+
+            case "smartwatch":
+                newDevice = new Smartwatch(name, price, quantity);
+                break;
+            case "smart watch":
+                newDevice = new Smartwatch(name, price, quantity);
+                break;
+
+            default:
+                break;
+        }
 
         return newDevice;
-
     }
 
     public DeviceObj removeDevice(String name) throws NoSuchElementException {
@@ -108,10 +162,8 @@ public class Inventory {
 
         removedDevice = removeDevice(name);
 
-        scan.close();
         return removedDevice;
     }
-    
 
     public DeviceObj updateDevice() {
         // ask new data
@@ -130,10 +182,10 @@ public class Inventory {
             System.out.print("Enter the name of the device to update: ");
             name = scan.nextLine();
 
-            System.out.print("Enter new price");
+            System.out.print("Enter new price: ");
             price_str = scan.nextLine();
 
-            System.out.print("Enter new quantity");
+            System.out.print("Enter new quantity: ");
             quantity = scan.nextInt();
 
             // find device
@@ -152,7 +204,7 @@ public class Inventory {
             deviceToUpdate.setPrice(price_double);
             deviceToUpdate.setQuantity(quantity);
 
-            System.out.printf("%s details updated: Price - %.2f$, Quantity - %d", name, price_double, quantity);
+            System.out.printf("\n%s details updated: Price - %.2f$, Quantity - %d\n\n", name, price_double, quantity);
 
         }
 
@@ -168,18 +220,8 @@ public class Inventory {
 
         }
 
-        finally {
-            scan.close();
-        }
         return null;
     }
-
-
-
-
-
-
-
 
     public DeviceObj findDevice(String name) {
         DeviceObj targetDevice = null;
@@ -195,7 +237,7 @@ public class Inventory {
         return targetDevice;
     }
 
-    public void displayAllDevices() {
+    public void printInventory() {
         // DISCUSS: listing all? in what format? category by category? does order
         // matter?
         // DECISION: Let's go, category by category, and whatever order they're within
@@ -203,22 +245,28 @@ public class Inventory {
 
         // ATTENTION: hard-coded values.
         // DISCUSS: can we make the linked-list node indeces more dynamic
-        Integer objectCount = 0;
+
+        Integer objectCount = 1;
         ArrayList<DeviceObj> categoryToPrint = null;
+
+        System.out.println("\nDevice List:");
+
         for (int i = 0, length = categoriesLinkedList.size(); i < length; ++i) {
             categoryToPrint = categoriesLinkedList.get(i);
 
             for (int j = 0, array_length = categoryToPrint.size(); j < array_length; ++j) {
                 System.out.printf("%d. ", objectCount);
                 categoryToPrint.get(j).print(); // DISCUSS: change method name from print?
-
+                ++objectCount;
             }
 
         }
+        System.out.println();
+
     }
 
     private void printObjectList(ArrayList<DeviceObj> objectList) {
-        for (int count = 0; count < objectList.size(); ++count) {
+        for (int count = 1; count < objectList.size(); ++count) {
             System.out.printf("%d. ", count);
             objectList.get(count).print();
         }
@@ -228,14 +276,15 @@ public class Inventory {
         DeviceObj currentCheapest = null;
         DeviceObj currentObject = null;
         ArrayList<DeviceObj> currentCategory = null;
-        Integer objectCount = 0;
 
         for (int i = 0, length = categoriesLinkedList.size(); i < length; ++i) {
             currentCategory = categoriesLinkedList.get(i);
 
             for (int j = 0, array_length = currentCategory.size(); j < array_length; ++j) {
                 currentObject = currentCategory.get(j);
-                if (currentObject.getPrice() < currentCheapest.getPrice())
+                if (currentCheapest == null)
+                    currentCheapest = currentObject;
+                else if (currentObject.getPrice() < currentCheapest.getPrice())
                     currentCheapest = currentObject;
             }
         }
@@ -252,22 +301,38 @@ public class Inventory {
 
         // TODO: implement comparator, or provide custom one here.
 
-        // Collections.sort(objectList);
-
+        
+        
+        System.out.println();
         printObjectList(objectList);
+        System.out.println();
+
 
     }
 
     private void printMainMenu() {
-        System.out.println("This is the main menu.");
+        System.out.println("Welcome to the Electronics Inventory Management System!");
+
+        System.out.println("Please select an option:");
+        System.out.println("1. Add a new device");
+        System.out.println("2. Remove a device");
+        System.out.println("3. Update device details");
+        System.out.println("4. List all devices");
+        System.out.println("5. Find the cheapest device");
+        System.out.println("6. Sort devices by price");
+        System.out.println("7. Calculate total inventory value");
+        System.out.println("8. Restock a device");
+        System.out.println("9. Export inventory report");
+        System.out.println("0. Exit");
     }
 
-    private void mainMenu() {
+    public void mainMenu() {
         int selection;
         Scanner input = new Scanner(System.in);
+
         do {
             try {
-                printMainMenu();
+                printMainMenu(); // CHECK is this new scan creation fine?
                 selection = input.nextInt();
                 if (selection < 0 || selection > 9) {
                     System.out.println("Invalid input.");
@@ -280,12 +345,12 @@ public class Inventory {
                         break;
                     case 2:
                         removeDevice();
-                    break;
+                        break;
                     case 3:
                         updateDevice();
                         break;
                     case 4:
-                        displayAllDevices();
+                        printInventory();
                         break;
                     case 5:
                         DeviceObj cheapestDevice = findCheapest();
@@ -296,7 +361,7 @@ public class Inventory {
                         break;
                     case 6:
                         // Sort by price
-                        printSortedByPrice();  
+                        printSortedByPrice();
                         break;
                     case 7:
                         // Total inventory value
@@ -309,6 +374,7 @@ public class Inventory {
                     case 9:
                         // Export inventory report
                         exportInventoryReport();
+                        exportInventoryReportTerminal();
                         break;
                     case 0:
                         // Exit
@@ -342,18 +408,17 @@ public class Inventory {
         device = findDevice(name);
 
         System.out.print("Do you want to add or remove stock? (Add/Remove): ");
-        if (scan.nextLine().equals("Add")) {
+        if (scan.nextLine().toLowerCase().equals("add")) {
             System.out.print("Enter the quantity to add: ");
             quantityChange = scan.nextInt();
             device.addQuantity(quantityChange);
 
-        } else if (scan.nextLine().equals("Remove")) {
+        } else if (scan.nextLine().toLowerCase().equals("Remove")) {
             System.out.print("Enter the wuantity to remove: ");
             quantityChange = scan.nextInt();
             device.removeQuantity(quantityChange);
         }
 
-        scan.close();
         return device;
     }
 
@@ -362,12 +427,13 @@ public class Inventory {
         // CHECK: this overwrites the file with same name, if it exists. this ok?
         // DISCUSS: is this +1 to filename approach appropriate?
         String fileName = "report";
-        String filePath = fileName + "txt";
+        String filePath = fileName + ".txt";
         Integer index = 1;
         File baseFile = new File(filePath);
+
         try {
             while (baseFile.exists()) {
-                filePath = fileName + index + ".txt";
+                filePath = fileName + '(' + index + ')' + ".txt";
                 baseFile = new File(filePath);
                 ++index;
             }
@@ -377,21 +443,23 @@ public class Inventory {
 
             PrintWriter writer = new PrintWriter(new FileWriter(filePath));
             Integer count = Integer.valueOf(0);
+            Integer no = Integer.valueOf(1);
             Double value = Double.valueOf(0);
 
             writer.println("Electronics Shop Inventroy Report");
             // TODO: println "Generated on: `date`"
             LocalDate date = LocalDate.now();
-            writer.printf("Generated on: %s\n", reportDateFormat(date));
+            writer.printf("Generated on: %s\n\n", reportDateFormat(date));
             writer.println("---------------------------------------");
             writer.printf("| %s  | %s\t| %s\t\t| %s\t| %s |\n", "No.", "Category", "Name", "Price", "Quantity");
             writer.println("---------------------------------------");
 
             for (ArrayList<DeviceObj> category : categoriesLinkedList)
                 for (DeviceObj device : category) {
-                    writer.println(formattedExportLine(device, count));
-                    ++count;
+                    writer.println(formattedExportLine(device, no));
+                    count += device.getQuantity();
                     value += device.getPrice() * device.getQuantity();
+                    ++no;
                 }
 
             writer.println("---------------------------------------");
@@ -402,13 +470,46 @@ public class Inventory {
             writer.printf("- Total Inventory Value: %.2f\n\n", value);
 
             writer.print("End of Report");
-
+            writer.close();
         }
 
-        // TODO: caught exception type.
-        catch (Exception e) {
+        catch (IOException e) {
+            System.err.println("There's been an issue exporting to a file.");
 
+            // do nothing.
         }
+
+    }
+
+    public void exportInventoryReportTerminal() {
+        Integer count = 0;
+        Double value = 0.0;
+        Integer no = 1;
+
+        System.out.println("Electronics Shop Inventory Report");
+        LocalDate date = LocalDate.now();
+        System.out.printf("Generated on: %s\n\n", reportDateFormat(date));
+        System.out.println("---------------------------------------");
+        System.out.printf("| %s  | %s\t| %s\t\t| %s\t| %s |\n", "No.", "Category", "Name", "Price", "Quantity");
+        System.out.println("---------------------------------------");
+
+        for (ArrayList<DeviceObj> category : categoriesLinkedList) {
+            for (DeviceObj device : category) {
+                System.out.println(formattedExportLine(device, no));
+                count += device.getQuantity();
+                value += device.getPrice() * device.getQuantity();
+                ++no;
+            }
+        }
+
+        System.out.println("---------------------------------------");
+        System.out.print("\n\n");
+
+        System.out.println("Summary: ");
+        System.out.printf("- Total Number of Devices: %d\n", count);
+        System.out.printf("- Total Inventory Value: %.2f\n\n", value);
+
+        System.out.println("End of Report\n");
     }
 
     private String reportDateFormat(LocalDate date) {
@@ -448,7 +549,8 @@ public class Inventory {
     private String formattedExportLine(DeviceObj device, int no) {
         String line = new String();
         // CHECK: is this format ok ?
-        String.format("| %d  | %s | %s | %.2f | %d |", no, device.getCategory(), device.getName(), device.getPrice(),
+        line = String.format("| %d  | %s | %s | %.2f | %d |", no, device.getCategory(), device.getName(),
+                device.getPrice(),
                 device.getQuantity());
 
         return line;
@@ -489,14 +591,18 @@ public class Inventory {
         // CHECK: assigned null to suppress `possibly uninitialized` is this the best
         // way of doing this?
         Double price_as_double = null;
-        String price_without_dollar_sign;
+        String price_without_dollar_sign = new String();
         try {
             if (price.endsWith("$")) {
-                price_without_dollar_sign = price.substring(0, price.length());
-                price_as_double = Double.parseDouble(price_without_dollar_sign);
-                if (price_as_double < 0)
-                    price_as_double = null;
+                price_without_dollar_sign = price.substring(0, price.length() - 1);
+                price_as_double = Double.valueOf(price_without_dollar_sign);
+            } else {
+                price_as_double = Double.valueOf(price);
             }
+
+            if (price_as_double < 0)
+                price_as_double = null;
+
         }
 
         // CHECK: is return null fine?

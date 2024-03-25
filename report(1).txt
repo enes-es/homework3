@@ -1,0 +1,16 @@
+Electronics Shop Inventroy Report
+Generated on: 25th MARCH 2024
+
+---------------------------------------
+| No.  | Category	| Name		| Price	| Quantity |
+---------------------------------------
+| 1  | Laptop | Lenovo laptop | 100.00 | 10 |
+| 2  | TV | SAMSUNG TV | 1000.00 | 5 |
+---------------------------------------
+
+
+Summary: 
+- Total Number of Devices: 15
+- Total Inventory Value: 6000.00
+
+End of Report

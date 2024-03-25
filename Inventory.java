@@ -1,5 +1,6 @@
 import java.util.Scanner;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.InputMismatchException;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
@@ -13,7 +14,10 @@ import java.time.LocalDate;
 
 public class Inventory {
     private LinkedList<ArrayList<DeviceObj>> categoriesLinkedList;
-
+    /**
+     * creates a new Inventory object with 5 categories: 0: Smartphone 1: Laptop 2: TV 3: Headphones 4: Smartwatch
+     * Complexity: O(1)
+     */
     public Inventory() {
         categoriesLinkedList = new LinkedList<ArrayList<DeviceObj>>();
         for (int i = 0; i < 5; ++i) {
@@ -23,6 +27,10 @@ public class Inventory {
 
     // DISCUSS: should it throw if newDevice category invalid?
     // DISCUSS: what about other invalid datas?
+    /**
+     * Adds a new device to the inventory. Complexity: O(1)
+     * @param newDevice
+     */
     public void addDevice(DeviceObj newDevice) {
 
         String category_str = newDevice.getCategory();
@@ -32,6 +40,12 @@ public class Inventory {
 
     }
 
+    /**
+     * Returns the index of the category within the linked-list: categoriesLinkedList
+     * @param category_str
+     * @return the index of the category within the linked-list: categoriesLinkedList
+     * complexity: O(1)
+     */
     private Integer getCategoryIdx(String category_str) {
         switch (category_str.toLowerCase()) {
             case "smartphone":
@@ -55,6 +69,10 @@ public class Inventory {
     }
 
     // DISCUSS: shouldn't this be a method of DeviceObj?
+    /**
+     * Adds a new device to the inventory. Complexity: O(1)
+     * @return
+     */
     private DeviceObj addDevice() {
         Scanner in = new Scanner(System.in);
         DeviceObj newDevice = null;
@@ -88,6 +106,14 @@ public class Inventory {
     }
 
     // TODO: change visibility to private
+    /**
+     *  Creates a new device object based on the category. Complexity: O(1)
+     * @param category must be valid
+     * @param name 
+     * @param price must be positive
+     * @param quantity must be positive
+     * @return
+     */
     public DeviceObj deviceObjCreator(String category, String name, Double price, Integer quantity) {
         // DISCUSS: should we throw if category is invalid?
         // DISCUSS: should we throw if price or quantity is invalid?
@@ -132,6 +158,12 @@ public class Inventory {
         return newDevice;
     }
 
+    /**
+     * Removes a device from the inventory. Complexity: O(n*m) where n is the number of categories and m is the number of devices in each category.
+     * @param name the name of the device to remove
+     * @return
+     * @throws NoSuchElementException
+     */
     public DeviceObj removeDevice(String name) throws NoSuchElementException {
         // find device
         // if exists remove and return it
@@ -148,6 +180,11 @@ public class Inventory {
         throw new NoSuchElementException("Can't find the device");
     }
 
+    /**
+     * Removes a device from the inventory. Complexity: O(n*m) where n is the number of categories and m is the number of devices in each category.
+     * @return
+     * @throws NoSuchElementException
+     */
     private DeviceObj removeDevice() throws NoSuchElementException {
         // ask for name
         // call removeDevice(name)
@@ -165,6 +202,10 @@ public class Inventory {
         return removedDevice;
     }
 
+    /**
+     *  Updates a device in the inventory. Complexity: O(n*m) where n is the number of categories and m is the number of devices in each category.
+     * @return 
+     */
     public DeviceObj updateDevice() {
         // ask new data
         // find the device
@@ -223,6 +264,11 @@ public class Inventory {
         return null;
     }
 
+    /**
+     * Finds a device in the inventory. Complexity: O(n*m) where n is the number of categories and m is the number of devices in each category.
+     * @param name
+     * @return
+     */
     public DeviceObj findDevice(String name) {
         DeviceObj targetDevice = null;
 
@@ -237,6 +283,9 @@ public class Inventory {
         return targetDevice;
     }
 
+    /**
+     * Prints the inventory. Complexity: O(n*m) where n is the number of categories and m is the number of devices in each category.
+     */
     public void printInventory() {
         // DISCUSS: listing all? in what format? category by category? does order
         // matter?
@@ -265,6 +314,10 @@ public class Inventory {
 
     }
 
+    /**
+     * Prints a list of objects. Complexity: O(n) where n is the number of objects in the list.
+     * @param objectList
+     */
     private void printObjectList(ArrayList<DeviceObj> objectList) {
         for (int count = 1; count < objectList.size(); ++count) {
             System.out.printf("%d. ", count);
@@ -272,6 +325,10 @@ public class Inventory {
         }
     }
 
+    /**
+     * Finds the cheapest device in the inventory. Complexity: O(n*m) where n is the number of categories and m is the number of devices in each category.
+     * @return
+     */
     public DeviceObj findCheapest() {
         DeviceObj currentCheapest = null;
         DeviceObj currentObject = null;
@@ -291,6 +348,10 @@ public class Inventory {
         return currentCheapest;
     }
 
+
+    /**
+     * Prints the inventory sorted by price. Complexity: O(n*m) where n is the number of categories and m is the number of devices in each category.
+     */
     public void printSortedByPrice() {
         ArrayList<DeviceObj> objectList = new ArrayList<>();
         for (ArrayList<DeviceObj> currentCategory : categoriesLinkedList) {
@@ -301,7 +362,7 @@ public class Inventory {
 
         // TODO: implement comparator, or provide custom one here.
 
-        
+        Collections.sort(objectList);
         
         System.out.println();
         printObjectList(objectList);
@@ -310,6 +371,9 @@ public class Inventory {
 
     }
 
+    /**
+     * Prints the main menu. Complexity: O(1)
+     */
     private void printMainMenu() {
         System.out.println("Welcome to the Electronics Inventory Management System!");
 
@@ -326,6 +390,9 @@ public class Inventory {
         System.out.println("0. Exit");
     }
 
+    /**
+     * Prints the main menu and handles user input. Complexity: N/A, very high standard deviation, depends on user input.
+     */
     public void mainMenu() {
         int selection;
         Scanner input = new Scanner(System.in);
@@ -396,6 +463,10 @@ public class Inventory {
     }
 
     // DISCUSS: should I catch InputMismatchException from the scanner?
+    /**
+     * Restocks a device. Complexity: O(n*m) where n is the number of categories and m is the number of devices in each category.
+     * @return
+     */
     private DeviceObj restockDevice() {
         String name;
         Integer quantityChange;
@@ -422,6 +493,9 @@ public class Inventory {
         return device;
     }
 
+    /**
+     * Exports the inventory report to a file. Complexity: O(n*m) where n is the number of categories and m is the number of devices in each category.
+     */
     public void exportInventoryReport() {
         // CHECK: filename compatible with assignment
         // CHECK: this overwrites the file with same name, if it exists. this ok?
@@ -481,6 +555,9 @@ public class Inventory {
 
     }
 
+    /**
+     * Exports the inventory report to the terminal. Complexity: O(n*m) where n is the number of categories and m is the number of devices in each category.
+     */
     public void exportInventoryReportTerminal() {
         Integer count = 0;
         Double value = 0.0;
@@ -521,6 +598,11 @@ public class Inventory {
         return formattedDate;
     }
 
+    /**
+     * Returns the suffix for the day. Complexity: O(1)
+     * @param dayOfMonth
+     * @return
+     */
     private String getDaySuffix(Integer dayOfMonth) {
         String suffix;
         if (dayOfMonth >= 11 && dayOfMonth <= 13)
@@ -546,6 +628,12 @@ public class Inventory {
         return suffix;
     }
 
+    /**
+     * Returns a formatted line for the export. Complexity: O(1)
+     * @param device the device to be formatted
+     * @param no the number wanted to be displayed at the beginning of the line
+     * @return
+     */
     private String formattedExportLine(DeviceObj device, int no) {
         String line = new String();
         // CHECK: is this format ok ?
@@ -556,6 +644,10 @@ public class Inventory {
         return line;
     }
 
+    /**
+     * Returns the total value of the inventory. Complexity: O(n*m) where n is the number of categories and m is the number of devices in each category.
+     * @return the total value of the inventory
+     */
     public Double totalValue() {
         Double value = Double.valueOf(0);
 
@@ -567,10 +659,18 @@ public class Inventory {
         return value;
     }
 
+    /**
+     * Prints the total value of the inventory. Complexity: O(n*m) where n is the number of categories and m is the number of devices in each category.
+     */
     public void printTotalValue() {
-        System.out.printf("Total inventory value: $%.2f", totalValue());
+        System.out.printf("\n\nTotal inventory value: $%.2f\n\n", totalValue());
     }
 
+    /**
+     * Processes the price. Complexity: O(1)
+     * @param price the price to be processed
+     * @return the price as a double
+     */
     private static Double processPrice(String price) {
         // price input includes a $ at the end.
         // ex: 526.65$

@@ -1,4 +1,5 @@
-public abstract class DeviceObj implements Device {
+
+public abstract class DeviceObj implements Device, Comparable<DeviceObj> {
     
 
     final private String category;
@@ -70,6 +71,7 @@ public abstract class DeviceObj implements Device {
     void print() {
         System.out.println(this.toString());
     }
+
 
 
 }

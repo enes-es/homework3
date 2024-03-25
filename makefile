@@ -33,6 +33,7 @@ doc:
 clean:
 	$(RM) *.class 
 
-
+cleanreport:
+	$(RM) report(?:\(\d+\))?\.txt
 cleandoc:
 	$(RM) -r ./javadoc

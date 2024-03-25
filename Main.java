@@ -20,8 +20,7 @@ public class Main {
         inventory.addDevice(example3);
         inventory.addDevice(example4);
         inventory.addDevice(example5);
-        
-        inventory.printInventory();
+
 
         inventory.mainMenu();
 

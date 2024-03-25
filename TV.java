@@ -5,4 +5,11 @@ public class TV extends DeviceObj{
 
     private static final String category_string = "TV";
 
+    @Override
+    public int compareTo(DeviceObj o) {
+        if (this.getPrice() == o.getPrice())
+            return 0;
+        else
+            return this.getPrice() > o.getPrice() ? 1 : -1;
+    }
 }
